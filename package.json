@@ -5,7 +5,8 @@
   "author": "nudabagana <matasramanauskas@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "tsc && node -r source-map-support/register dist"
+    "start-dev": "tsc && node -r source-map-support/register dist",
+    "start": "node -r source-map-support/register dist"
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",
