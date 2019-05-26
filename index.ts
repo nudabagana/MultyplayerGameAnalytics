@@ -44,13 +44,25 @@ const getGameObject = (gameObjects: IGameObject[], type: GameObjectTypes) => {
 };
 
 const getPlayerAtXYTime = (data: IData, x: number, y: number) => {
-  const entry = data.states.find(entry => {
+  const entry = data.states.find((entry, index) => {
     const player = getGameObject(entry.gameObjectState, GameObjectTypes.PLAYER);
     if (!player) {
       return false;
     }
     if (Math.abs(player.x - x) < 10 && Math.abs(player.y - y) < 10) {
-      return true;
+      // also check, that prev state was wrong
+      // return true;
+
+      const prevState = data.states[index-1];
+      if (prevState){
+        const prevPlayer = getGameObject(prevState.gameObjectState, GameObjectTypes.PLAYER);
+        if (prevPlayer){
+          if (!(Math.abs(prevPlayer.x - x) < 10 && Math.abs(prevPlayer.y - y) < 10)){
+            return true;
+          }
+        }
+      }
+      return false
     }
     return false;
   });
@@ -114,23 +126,6 @@ const getGameObjectMoveSquare = (
   return result;
 };
 
-const getInput5 = (data: IData) => {
-  const moveX900Y100Time = getActionXYTime(data, 900, 100, ACTIONS.MOVE);
-  const playerAtX900Y100Time = getPlayerAtXYTime(data, 900, 100);
-  let playerMoveX900Y100Square = null;
-  if (moveX900Y100Time && playerAtX900Y100Time) {
-    const statesOfInterest = data.states.filter(
-      state =>
-        state.timeMs >= moveX900Y100Time && state.timeMs <= playerAtX900Y100Time
-    );
-    playerMoveX900Y100Square = getGameObjectMoveSquare(statesOfInterest, GameObjectTypes.PLAYER);
-  }
-
-  const playerStartMoveTime = getPlayerStartMoveTime(data);
-  const movDelay = getDelay(moveX900Y100Time, playerStartMoveTime);
-  return { movDelay, playerMoveX900Y100Square };
-};
-
 const getInput1 = (data: IData) => {
   const bulletActionTime = getActionXYTime(data, 500, 400, ACTIONS.BULLET);
   const bulletAppearTime = getGameObjectAppearTime(
@@ -165,13 +160,67 @@ const getInput2 = (data: IData) => {
   return { delay, rocketSq };
 };
 
+const getInput5 = (data: IData) => {
+  const moveX900Y100Time = getActionXYTime(data, 900, 100, ACTIONS.MOVE);
+  const playerAtX900Y100Time = getPlayerAtXYTime(data, 900, 100);
+  let playerSq = null;
+  if (moveX900Y100Time && playerAtX900Y100Time) {
+    const statesOfInterest = data.states.filter(
+      state =>
+        state.timeMs >= moveX900Y100Time && state.timeMs <= playerAtX900Y100Time
+    );
+    playerSq = getGameObjectMoveSquare(statesOfInterest, GameObjectTypes.PLAYER);
+  }
+
+  const playerStartMoveTime = getPlayerStartMoveTime(data);
+  const delay = getDelay(moveX900Y100Time, playerStartMoveTime);
+  return { delay, playerSq };
+};
+
+const getInput6 = (data: IData) => {
+  const moveTime = getActionXYTime(data, 900, 100, ACTIONS.MOVE);
+  const startMoveTime = getPlayerStartMoveTime(data);
+  const playetAtDest = getPlayerAtXYTime(data, 100, 100);
+  let playerSq = null;
+  if (moveTime && playetAtDest) {
+    const statesOfInterest = data.states.filter(
+      state =>
+        state.timeMs >= moveTime && state.timeMs <= playetAtDest
+    );
+    playerSq = getGameObjectMoveSquare(statesOfInterest, GameObjectTypes.PLAYER);
+  }
+
+  const delay = getDelay(moveTime, startMoveTime);
+  return { delay, playerSq };
+};
+
+const getInput8 = (data: IData) => {
+  const moveTime = getActionXYTime(data, 900, 100, ACTIONS.MOVE);
+  const startMoveTime = getPlayerStartMoveTime(data);
+  const playetAtDest = getPlayerAtXYTime(data, 900, 700);
+  let playerSq = null;
+  if (moveTime && playetAtDest) {
+    const statesOfInterest = data.states.filter(
+      state =>
+        state.timeMs >= moveTime && state.timeMs <= playetAtDest
+    );
+    playerSq = getGameObjectMoveSquare(statesOfInterest, GameObjectTypes.PLAYER);
+  }
+
+  const delay = getDelay(moveTime, startMoveTime);
+  return { delay, playerSq };
+};
+
+
 const analyzeFile = (filename: string) => {
   const data: IData = JSON.parse(readFileSync(`./input/${filename}`, "utf8"));
 
   const info: IInfo = {
-    input1: getInput1(data),
-    input2: getInput2(data),
+    input1_3: getInput1(data),
+    input2_4: getInput2(data),
     input5: getInput5(data),
+    input6_7: getInput6(data),
+    input8_9: getInput8(data),
   };
 
   writeFileSync(`./output/${filename}`, JSON.stringify(info));

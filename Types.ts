@@ -30,9 +30,11 @@ export interface IAction {
 }
 // Output Types
 export interface IInfo {
-  input1: { delay: number | null; playerSq: number | null };
-  input2: { delay: number | null; rocketSq: number | null };
-  input5: { movDelay: number | null; playerMoveX900Y100Square: number | null };
+  input1_3: { delay: number | null; playerSq: number | null };
+  input2_4: { delay: number | null; rocketSq: number | null };
+  input5: { delay: number | null; playerSq: number | null };
+  input6_7: { delay: number | null; playerSq: number | null };
+  input8_9: { delay: number | null; playerSq: number | null };
 }
 
 export enum GameObjectTypes {
